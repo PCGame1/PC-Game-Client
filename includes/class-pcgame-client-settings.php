@@ -182,6 +182,11 @@ class PCGame_client_Settings {
 		return $links;
 	}
 
+	public function maketokens( $chars ) {
+		return wp_generate_password( $chars, false );
+	}
+
+
 	/**
 	 * Build settings fields
 	 *
@@ -190,7 +195,7 @@ class PCGame_client_Settings {
 	private function settings_fields() {
 
 		$settings['standard'] = array(
-			'description' => __( 'These are fairly standard form input fields.', 'pcgame-client' ),
+			'description' => __( 'This enables the site to connect to PC Game Server site', 'pcgame-client' ),
 			'fields'      => array(
 				array(
 					'id'          => 'enable_access',
@@ -202,18 +207,18 @@ class PCGame_client_Settings {
 				array(
 					'id'          => 'auth_id',
 					'label'       => __( 'Authentication ID', 'pcgame-client' ),
-					'description' => __( 'Unique ramdom generated key to access the site.', 'pcgame-client' ),
+					'description' => __( 'Unique random generated ID to access the site.', 'pcgame-client' ),
 					'type'        => 'text',
-					'default'     => '',
-					'placeholder' => __( '', 'pcgame-client' ),
+					'default'     => $this->maketokens( 12 ),
+					'placeholder' => __( 'Do not leave blank', 'pcgame-client' ),
 				),
 				array(
 					'id'          => 'auth_key',
 					'label'       => __( 'Authentication Key', 'pcgame-client' ),
-					'description' => __( 'Unique ramdom generated key to access the site.', 'pcgame-client' ),
+					'description' => __( 'Unique random generated KEY to access the site.', 'pcgame-client' ),
 					'type'        => 'text',
-					'default'     => '',
-					'placeholder' => __( '', 'pcgame-client' ),
+					'default'     => $this->maketokens( 20 ),
+					'placeholder' => __( 'Do not leave blank', 'pcgame-client' ),
 				),
 				array(
 					'id'          => 'allowed_ips',
@@ -222,7 +227,7 @@ class PCGame_client_Settings {
 					'type'        => 'text',
 					'default'     => '',
 					'placeholder' => __( 'x.x.x.x', 'pcgame-client' ),
-				)
+				),
 			),
 		);
 
@@ -304,12 +309,36 @@ class PCGame_client_Settings {
 		echo $html; //phpcs:ignore
 	}
 
+	public function get_auth_hash() {
+		$authid = get_option( 'pcgclient_auth_id' );
+		$authkey = get_option( 'pcgclient_auth_key' );
+
+		$authentication_hash = base64_encode( $authid . ':' . $authkey );
+		return $authentication_hash;
+	}
+
+	public function init_values() {
+		$authid = get_option( 'pcgclient_auth_id' );
+		$authkey = get_option( 'pcgclient_auth_key' );
+
+		if ( ( empty ( $authid ) ) || ( empty ( $authkey ) ) ) {
+			return 'Do not leave Authentication ID or KEY empty. Make sure you save the random seed when the plugin is ran for the first time.';
+		} else {
+			$url = 'Use this to PCGame Admin Quick add: <code>' . site_url() . '|' . base64_encode( $authid . ':' . $authkey ) . '</code>';
+
+			return $url;
+		}
+	}
+
+
 	/**
 	 * Load settings page content.
 	 *
 	 * @return void
 	 */
 	public function settings_page() {
+
+		$datareturn = $this->init_values();
 
 		// Build page HTML.
 		$html      = '<div class="wrap" id="' . $this->parent->_token . '_settings">' . "\n";
@@ -369,11 +398,13 @@ class PCGame_client_Settings {
 					$html .= '<input type="hidden" name="tab" value="' . esc_attr( $tab ) . '" />' . "\n";
 					$html .= '<input name="Submit" type="submit" class="button-primary" value="' . esc_attr( __( 'Save Settings', 'pcgame-client' ) ) . '" />' . "\n";
 				$html     .= '</p>' . "\n";
+				$html     .= $datareturn . "\n";
 			$html         .= '</form>' . "\n";
 		$html             .= '</div>' . "\n";
 
 		echo $html; //phpcs:ignore
 	}
+
 
 	/**
 	 * Main PCGame_client_Settings Instance

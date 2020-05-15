@@ -139,13 +139,17 @@ class PCGame_client {
 		$this->load_plugin_textdomain();
 		add_action( 'init', array( $this, 'load_localisation' ), 0 );
 
-		add_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
+		if ( $this->isthis_enabled() ) {
+			add_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
 
-		add_filter( 'rest_authentication_errors', array( $this, 'json_basic_auth_error' ) );
+			add_filter( 'rest_authentication_errors', array( $this, 'json_basic_auth_error' ) );
 
-		add_filter( 'rest_authentication_errors', array( $this, 'filter_incoming_connections' ) );
+			add_filter( 'rest_authentication_errors', array( $this, 'filter_incoming_connections' ) );
+		}
 
 	} // End __construct ()
+
+
 
 	/**
 	 * Register post type function.
@@ -319,7 +323,6 @@ class PCGame_client {
 	public function install() {
 		$this->_log_version_number();
 
-		
 	} // End install ()
 
 	/**
@@ -344,27 +347,18 @@ class PCGame_client {
 		}
 	
 		// Check that we're trying to authenticate
-		if ( !isset( $_SERVER['PHP_AUTH_USER'] ) ) {
+		if ( ! isset( $_SERVER['PHP_AUTH_USER'] ) ) {
 			return $user;
 		}
-	
-		$username = $_SERVER['PHP_AUTH_USER'];
-		$password = $_SERVER['PHP_AUTH_PW'];
-	
-		/**
-		 * In multi-site, wp_authenticate_spam_check filter is run on authentication. This filter calls
-		 * get_currentuserinfo which in turn calls the determine_current_user filter. This leads to infinite
-		 * recursion and a stack overflow unless the current function is removed from the determine_current_user
-		 * filter during authentication.
-		 */
+
 		remove_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
 	
 		// $user = wp_authenticate( $username, $password );
 		// Create ID and token
-		$user = wp_authenticate( 'carl', '1234' );
-	
-		// var_dump( $_SERVER );
-	
+
+		if ( $this->verify_cred() ) {
+			$user = $this->get_admin_userid();
+		}
 	
 		add_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
 	
@@ -379,9 +373,8 @@ class PCGame_client {
 	}
 
 	public function json_basic_auth_error( $error ) {
-		// Passthrough other errors
 		if ( ! empty( $error ) ) {
-			return $error;
+			return new WP_Error( 'forbidden_access', 'Access denied', array( 'status' => 403 ) );
 		}
 	
 		global $wp_json_basic_auth_error;
@@ -390,16 +383,57 @@ class PCGame_client {
 	}
 
 	public function filter_incoming_connections( $errors ){
-
-		$allowedAddress = array( '2001:4451:8579:ed00:c151:9867:8281:b2f' );
-		// $allowedAddress = array( '127.0.0.1' );
-		$requestServer = $_SERVER['REMOTE_ADDR'];
-	
-		if( ! in_array( $requestServer, $allowedAddress ) )
+		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) ) {
 			return new WP_Error( 'forbidden_access', 'Access denied', array( 'status' => 403 ) );
-	
-		return $errors; 
-	
+		}
+		$allowedaddress = get_option( 'pcgclient_allowed_ips' );
+		$request_server = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+
+		if ( ! ( empty( $allowedaddress ) ) ) {
+			$csv = explode( ',', $allowedaddress );
+
+			if ( ! in_array( $request_server, $csv, true ) ) {
+				return new WP_Error( 'forbidden_access', 'Access denied', array( 'status' => 403 ) );
+			} else {
+				return true;
+			}
+		} else {
+			return true;
+		}
+
+	}
+
+	public function get_admin_userid() {
+		$adminuser = get_users( [ 'role__in' => [ 'author', 'administrator' ] ] );
+		foreach ( $adminuser as $user ) {
+			return $user;
+		}
+	}
+
+	public function isthis_enabled() {
+		$allowed = get_option( 'pcgclient_enable_access' );
+		if ( 'on' === $allowed ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function verify_cred() {
+		if ( ( ! isset( $_SERVER['PHP_AUTH_USER'] ) ) || ( ! isset( $_SERVER['PHP_AUTH_PW'] ) ) ) {
+			return false;
+		}
+		$username = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) );
+		$password = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+
+		$authid  = get_option( 'pcgclient_auth_id' );
+		$authkey = get_option( 'pcgclient_auth_key' );
+
+		if ( ( $authid === $username ) && ( $authkey === $password ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

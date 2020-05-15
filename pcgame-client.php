@@ -2,18 +2,18 @@
 /**
  * Plugin Name: PCGame client
  * Version: 1.0.0
- * Plugin URI: http://www.hughlashbrooke.com/
- * Description: This is your starter template for your next WordPress plugin.
- * Author: Hugh Lashbrooke
- * Author URI: http://www.hughlashbrooke.com/
- * Requires at least: 4.0
- * Tested up to: 4.0
+ * Plugin URI: http://pcgame.lol/
+ * Description: PC Game Client to connect to Server
+ * Author: Carl Alberto
+ * Author URI: https://carlalberto.code.blog
+ * Requires at least: 4.8
+ * Tested up to: 5.4.1
  *
  * Text Domain: pcgame-client
  * Domain Path: /lang/
  *
  * @package WordPress
- * @author Hugh Lashbrooke
+ * @author Carl Alberto
  * @since 1.0.0
  */
 
@@ -27,8 +27,6 @@ require_once 'includes/class-pcgame-client-settings.php';
 
 // Load plugin libraries.
 require_once 'includes/lib/class-pcgame-client-admin-api.php';
-require_once 'includes/lib/class-pcgame-client-post-type.php';
-require_once 'includes/lib/class-pcgame-client-taxonomy.php';
 
 /**
  * Returns the main instance of PCGame_client to prevent the need to use globals.
