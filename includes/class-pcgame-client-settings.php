@@ -200,6 +200,14 @@ class PCGame_client_Settings {
 					'default'     => 'on',
 				),
 				array(
+					'id'          => 'auth_id',
+					'label'       => __( 'Authentication ID', 'pcgame-client' ),
+					'description' => __( 'Unique ramdom generated key to access the site.', 'pcgame-client' ),
+					'type'        => 'text',
+					'default'     => '',
+					'placeholder' => __( '', 'pcgame-client' ),
+				),
+				array(
 					'id'          => 'auth_key',
 					'label'       => __( 'Authentication Key', 'pcgame-client' ),
 					'description' => __( 'Unique ramdom generated key to access the site.', 'pcgame-client' ),
