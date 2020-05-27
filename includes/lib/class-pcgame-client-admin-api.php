@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Admin API class.
  */
-class PCGame_Client_Admin_API {
+class PCGame_client_Admin_API {
 
 	/**
 	 * Constructor function

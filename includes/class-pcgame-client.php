@@ -2,7 +2,7 @@
 /**
  * Main plugin class file.
  *
- * @package PCGame Client/Includes
+ * @package WordPress Plugin Template/Includes
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main plugin class.
  */
-class PCGame_Client {
+class PCGame_client {
 
 	/**
-	 * The single instance of PCGame_Client.
+	 * The single instance of PCGame_client.
 	 *
 	 * @var     object
 	 * @access  private
@@ -24,9 +24,9 @@ class PCGame_Client {
 	private static $_instance = null; //phpcs:ignore
 
 	/**
-	 * Local instance of PCGame_Client_Admin_API
+	 * Local instance of PCGame_client_Admin_API
 	 *
-	 * @var PCGame_Client_Admin_API|null
+	 * @var PCGame_client_Admin_API|null
 	 */
 	public $admin = null;
 
@@ -108,7 +108,7 @@ class PCGame_Client {
 	 * @param string $file File constructor.
 	 * @param string $version Plugin version.
 	 */
-	public function __construct( $file = '', $version = '1.0.1' ) {
+	public function __construct( $file = '', $version = '1.0.0' ) {
 		$this->_version = $version;
 		$this->_token   = 'pcgame_client';
 
@@ -122,8 +122,17 @@ class PCGame_Client {
 
 		register_activation_hook( $this->file, array( $this, 'install' ) );
 
+		// Load frontend JS & CSS.
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 10 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
+
+		// Load admin JS & CSS.
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 10, 1 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_styles' ), 10, 1 );
+
+		// Load API for generic admin functions.
 		if ( is_admin() ) {
-			$this->admin = new PCGame_Client_Admin_API();
+			$this->admin = new PCGame_client_Admin_API();
 		}
 
 		// Handle localisation.
@@ -151,7 +160,7 @@ class PCGame_Client {
 	 * @param string $description Description.
 	 * @param array  $options Options array.
 	 *
-	 * @return bool|string|PCGame_Client_Post_Type
+	 * @return bool|string|PCGame_client_Post_Type
 	 */
 	public function register_post_type( $post_type = '', $plural = '', $single = '', $description = '', $options = array() ) {
 
@@ -159,7 +168,7 @@ class PCGame_Client {
 			return false;
 		}
 
-		$post_type = new PCGame_Client_Post_Type( $post_type, $plural, $single, $description, $options );
+		$post_type = new PCGame_client_Post_Type( $post_type, $plural, $single, $description, $options );
 
 		return $post_type;
 	}
@@ -173,7 +182,7 @@ class PCGame_Client {
 	 * @param array  $post_types Post types to register this taxonomy for.
 	 * @param array  $taxonomy_args Taxonomy arguments.
 	 *
-	 * @return bool|string|PCGame_Client_Taxonomy
+	 * @return bool|string|PCGame_client_Taxonomy
 	 */
 	public function register_taxonomy( $taxonomy = '', $plural = '', $single = '', $post_types = array(), $taxonomy_args = array() ) {
 
@@ -181,7 +190,7 @@ class PCGame_Client {
 			return false;
 		}
 
-		$taxonomy = new PCGame_Client_Taxonomy( $taxonomy, $plural, $single, $post_types, $taxonomy_args );
+		$taxonomy = new PCGame_client_Taxonomy( $taxonomy, $plural, $single, $post_types, $taxonomy_args );
 
 		return $taxonomy;
 	}
@@ -265,19 +274,19 @@ class PCGame_Client {
 	} // End load_plugin_textdomain ()
 
 	/**
-	 * Main PCGame_Client Instance
+	 * Main PCGame_client Instance
 	 *
-	 * Ensures only one instance of PCGame_Client is loaded or can be loaded.
+	 * Ensures only one instance of PCGame_client is loaded or can be loaded.
 	 *
 	 * @param string $file File instance.
 	 * @param string $version Version parameter.
 	 *
-	 * @return Object PCGame_Client instance
-	 * @see PCGame_Client()
+	 * @return Object PCGame_client instance
+	 * @see PCGame_client()
 	 * @since 1.0.0
 	 * @static
 	 */
-	public static function instance( $file = '', $version = '1.0.1' ) {
+	public static function instance( $file = '', $version = '1.0.0' ) {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self( $file, $version );
 		}
@@ -291,7 +300,7 @@ class PCGame_Client {
 	 * @since 1.0.0
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Cloning of PCGame_Client is forbidden' ) ), esc_attr( $this->_version ) );
+		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Cloning of PCGame_client is forbidden' ) ), esc_attr( $this->_version ) );
 
 	} // End __clone ()
 
@@ -301,7 +310,7 @@ class PCGame_Client {
 	 * @since 1.0.0
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Unserializing instances of PCGame_Client is forbidden' ) ), esc_attr( $this->_version ) );
+		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Unserializing instances of PCGame_client is forbidden' ) ), esc_attr( $this->_version ) );
 	} // End __wakeup ()
 
 	/**
@@ -327,69 +336,53 @@ class PCGame_Client {
 		update_option( $this->_token . '_version', $this->_version );
 	} // End _log_version_number ()
 
-	/**
-	 * JSON basic auth.
-	 *
-	 * @param [type] $user user to auth.
-	 * @return int user id.
-	 */
 	public function json_basic_auth_handler( $user ) {
 		global $wp_json_basic_auth_error;
-
+	
 		$wp_json_basic_auth_error = null;
-
-		// Don't authenticate twice.
+	
+		// Don't authenticate twice
 		if ( ! empty( $user ) ) {
 			return $user;
 		}
-
-		// Check that we're trying to authenticate.
+	
+		// Check that we're trying to authenticate
 		if ( ! isset( $_SERVER['PHP_AUTH_USER'] ) ) {
 			return $user;
 		}
 
 		remove_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
+	
+		// $user = wp_authenticate( $username, $password );
+		// Create ID and token
 
-		// Create ID and token.
 		if ( $this->verify_cred() ) {
 			$user = $this->get_admin_userid();
 		}
-
+	
 		add_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
-
+	
 		if ( is_wp_error( $user ) ) {
 			$wp_json_basic_auth_error = $user;
 			return null;
 		}
-
+	
 		$wp_json_basic_auth_error = true;
-
+	
 		return $user->ID;
 	}
 
-	/**
-	 * JSON error return.
-	 *
-	 * @param [type] $error Error message.
-	 * @return string error message.
-	 */
 	public function json_basic_auth_error( $error ) {
 		if ( ! empty( $error ) ) {
 			return new WP_Error( 'forbidden_access', 'Access denied', array( 'status' => 403 ) );
 		}
-
+	
 		global $wp_json_basic_auth_error;
-
+	
 		return $wp_json_basic_auth_error;
 	}
 
-	/**
-	 * Filter incoming connections.
-	 *
-	 * @param [type] $errors Error message.
-	 * @return boolean Status if allowed.
-	 */
-	public function filter_incoming_connections( $errors ) {
+	public function filter_incoming_connections( $errors ){
 		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) ) {
 			return new WP_Error( 'forbidden_access', 'Access denied', array( 'status' => 403 ) );
 		}
@@ -410,23 +403,13 @@ class PCGame_Client {
 
 	}
 
-	/**
-	 * Roles allowed to connect.
-	 *
-	 * @return int User Id.
-	 */
 	public function get_admin_userid() {
-		$adminuser = get_users( [ 'role__in' => [ 'administrator' ] ] );
+		$adminuser = get_users( [ 'role__in' => [ 'author', 'administrator' ] ] );
 		foreach ( $adminuser as $user ) {
 			return $user;
 		}
 	}
 
-	/**
-	 * Enabled plugin.
-	 *
-	 * @return boolean State of the plugin.
-	 */
 	public function isthis_enabled() {
 		$allowed = get_option( 'pcgclient_enable_access' );
 		if ( 'on' === $allowed ) {
@@ -436,11 +419,6 @@ class PCGame_Client {
 		}
 	}
 
-	/**
-	 * Verify user.
-	 *
-	 * @return boolean Check if authenticated.
-	 */
 	public function verify_cred() {
 		if ( ( ! isset( $_SERVER['PHP_AUTH_USER'] ) ) || ( ! isset( $_SERVER['PHP_AUTH_PW'] ) ) ) {
 			return false;

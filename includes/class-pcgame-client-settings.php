@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Settings class.
  */
-class PCGame_Client_Settings {
+class PCGame_client_Settings {
 
 	/**
-	 * The single instance of PCGame_Client_Settings.
+	 * The single instance of PCGame_client_Settings.
 	 *
 	 * @var     object
 	 * @access  private
@@ -126,7 +126,7 @@ class PCGame_Client_Settings {
 		return apply_filters(
 			$this->base . 'menu_settings',
 			array(
-				'location'    => 'menu',
+				'location'    => 'menu', // Possible settings: options, menu, submenu.
 				'parent_slug' => 'options-general.php',
 				'page_title'  => __( 'PC Game Client', 'pcgame-client' ),
 				'menu_title'  => __( 'PC Game Client', 'pcgame-client' ),
@@ -157,6 +157,17 @@ class PCGame_Client_Settings {
 	 */
 	public function settings_assets() {
 
+		// We're including the farbtastic script & styles here because they're needed for the colour picker
+		// If you're not including a colour picker field then you can leave these calls out as well as the farbtastic dependency for the wpt-admin-js script below.
+		wp_enqueue_style( 'farbtastic' );
+		wp_enqueue_script( 'farbtastic' );
+
+		// We're including the WP media scripts here because they're needed for the image upload field.
+		// If you're not including an image upload then you can leave this function call out.
+		wp_enqueue_media();
+
+		wp_register_script( $this->parent->_token . '-settings-js', $this->parent->assets_url . 'js/settings' . $this->parent->script_suffix . '.js', array( 'farbtastic', 'jquery' ), '1.0.0', true );
+		wp_enqueue_script( $this->parent->_token . '-settings-js' );
 	}
 
 	/**
@@ -166,17 +177,11 @@ class PCGame_Client_Settings {
 	 * @return array        Modified links.
 	 */
 	public function add_settings_link( $links ) {
-		$settings_link = '<a href="admin.php?page=' . $this->parent->_token . '_settings">' . __( 'Settings', 'pcgame-client' ) . '</a>';
+		$settings_link = '<a href="options-general.php?page=' . $this->parent->_token . '_settings">' . __( 'Settings', 'pcgame-client' ) . '</a>';
 		array_push( $links, $settings_link );
 		return $links;
 	}
 
-	/**
-	 * Generate tokens.
-	 *
-	 * @param [type] $chars random seed.
-	 * @return string secret tokens.
-	 */
 	public function maketokens( $chars ) {
 		return wp_generate_password( $chars, false );
 	}
@@ -301,38 +306,25 @@ class PCGame_Client_Settings {
 	 */
 	public function settings_section( $section ) {
 		$html = '<p> ' . $this->settings[ $section['id'] ]['description'] . '</p>' . "\n";
-		echo wp_kses( $html, $this->allowed_htmls );
+		echo $html; //phpcs:ignore
 	}
 
-	/**
-	 * Get authentication hash.
-	 *
-	 * @return string Authentication hash.
-	 */
 	public function get_auth_hash() {
-		$authid  = get_option( 'pcgclient_auth_id' );
+		$authid = get_option( 'pcgclient_auth_id' );
 		$authkey = get_option( 'pcgclient_auth_key' );
 
-		$authentication_hash = base64_encode( $authid . ':' . $authkey ); //phpcs:ignore
+		$authentication_hash = base64_encode( $authid . ':' . $authkey );
 		return $authentication_hash;
 	}
 
-	/**
-	 * Initialize values.
-	 *
-	 * @return string Authentication output.
-	 */
 	public function init_values() {
-		$authid  = get_option( 'pcgclient_auth_id' );
+		$authid = get_option( 'pcgclient_auth_id' );
 		$authkey = get_option( 'pcgclient_auth_key' );
 
-		if ( ( empty( $authid ) ) || ( empty( $authkey ) ) ) {
+		if ( ( empty ( $authid ) ) || ( empty ( $authkey ) ) ) {
 			return 'Do not leave Authentication ID or KEY empty. Make sure you save the random seed when the plugin is ran for the first time.';
 		} else {
-			$key  = base64_encode( $authid . ':' . $authkey ); //phpcs:ignore
-			$url  = 'Use this to PCGame Admin Quick add: <code>' . site_url() . '|' . $key . '</code><br><br>OR Add new Site individually using:<br><br>';
-			$url .= 'Site URL: <code>' . site_url() . '</code><br>';
-			$url .= 'Site Passkey: <code>' . $key . '</code>';
+			$url = 'Use this to PCGame Admin Quick add: <code>' . site_url() . '|' . base64_encode( $authid . ':' . $authkey ) . '</code>';
 
 			return $url;
 		}
@@ -410,20 +402,20 @@ class PCGame_Client_Settings {
 			$html         .= '</form>' . "\n";
 		$html             .= '</div>' . "\n";
 
-		echo wp_kses( $html, $this->allowed_htmls );
+		echo $html; //phpcs:ignore
 	}
 
 
 	/**
-	 * Main PCGame_Client_Settings Instance
+	 * Main PCGame_client_Settings Instance
 	 *
-	 * Ensures only one instance of PCGame_Client_Settings is loaded or can be loaded.
+	 * Ensures only one instance of PCGame_client_Settings is loaded or can be loaded.
 	 *
 	 * @since 1.0.0
 	 * @static
-	 * @see PCGame_Client()
+	 * @see PCGame_client()
 	 * @param object $parent Object instance.
-	 * @return object PCGame_Client_Settings instance
+	 * @return object PCGame_client_Settings instance
 	 */
 	public static function instance( $parent ) {
 		if ( is_null( self::$_instance ) ) {
@@ -438,7 +430,7 @@ class PCGame_Client_Settings {
 	 * @since 1.0.0
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Cloning of PCGame_Client_API is forbidden.' ) ), esc_attr( $this->parent->_version ) );
+		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Cloning of PCGame_client_API is forbidden.' ) ), esc_attr( $this->parent->_version ) );
 	} // End __clone()
 
 	/**
@@ -447,132 +439,7 @@ class PCGame_Client_Settings {
 	 * @since 1.0.0
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Unserializing instances of PCGame_Client_API is forbidden.' ) ), esc_attr( $this->parent->_version ) );
+		_doing_it_wrong( __FUNCTION__, esc_html( __( 'Unserializing instances of PCGame_client_API is forbidden.' ) ), esc_attr( $this->parent->_version ) );
 	} // End __wakeup()
-
-	/**
-	 * Allowed html for output.
-	 *
-	 * @var array
-	 */
-	public $allowed_htmls = [
-		'a'        => [
-			'href'  => [],
-			'title' => [],
-			'class' => [],
-		],
-		'h1'       => [
-			'href'  => [],
-			'title' => [],
-			'class' => [],
-		],
-		'h2'       => [
-			'href'  => [],
-			'title' => [],
-			'class' => [],
-		],
-		'h3'       => [
-			'href'  => [],
-			'title' => [],
-			'class' => [],
-		],
-		'h4'       => [
-			'href'  => [],
-			'title' => [],
-			'class' => [],
-		],
-		'input'    => [
-			'id'                  => [],
-			'type'                => [],
-			'name'                => [],
-			'placeholder'         => [],
-			'value'               => [],
-			'class'               => [],
-			'checked'             => [],
-			'style'               => [],
-			'data-uploader_title' => [],
-			'data-uploader_text'  => [],
-			'tabindex'            => [],
-		],
-		'select'   => [
-			'id'          => [],
-			'type'        => [],
-			'name'        => [],
-			'placeholder' => [],
-			'value'       => [],
-			'multiple'    => [],
-			'style'       => [],
-		],
-		'option'   => [
-			'id'          => [],
-			'type'        => [],
-			'name'        => [],
-			'placeholder' => [],
-			'value'       => [],
-			'multiple'    => [],
-			'selected'    => [],
-		],
-		'label'    => [
-			'for'   => [],
-			'title' => [],
-		],
-		'span'     => [
-			'class' => [],
-			'title' => [],
-		],
-		'table'    => [
-			'scope' => [],
-			'title' => [],
-			'class' => [],
-			'role'  => [],
-		],
-		'tbody'    => [
-			'scope' => [],
-			'title' => [],
-			'class' => [],
-			'role'  => [],
-		],
-		'th'       => [
-			'scope' => [],
-			'title' => [],
-		],
-		'form'     => [
-			'method'      => [],
-			'type'        => [],
-			'name'        => [],
-			'placeholder' => [],
-			'value'       => [],
-			'multiple'    => [],
-			'selected'    => [],
-			'action'      => [],
-			'enctype'     => [],
-		],
-		'div'      => [
-			'class' => [],
-			'id'    => [],
-		],
-		'img'      => [
-			'class' => [],
-			'id'    => [],
-			'src'   => [],
-		],
-		'textarea' => [
-			'class'       => [],
-			'id'          => [],
-			'rows'        => [],
-			'cols'        => [],
-			'name'        => [],
-			'placeholder' => [],
-			'spellcheck'  => [],
-		],
-		'tr'       => [],
-		'td'       => [],
-		'p'        => [],
-		'br'       => [],
-		'em'       => [],
-		'strong'   => [],
-		'th'       => [],
-		'code'     => [],
-	];
 
 }

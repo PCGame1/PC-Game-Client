@@ -4,7 +4,7 @@ Donate link: https://carlalberto.code.blog
 Tags: wordpress, plugin, template
 Requires at least: 4.8
 Tested up to: 5.4.1
-Stable tag: 1.0.1
+Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,10 +15,6 @@ PC Game Client to connect to Server
 PC Game Client to connect to Server
 
 == Changelog ==
-
-= 1.0.1 =
-* 2020-05-22
-* Improved authentication method
 
 = 1.0 =
 * 2020-05-15
