@@ -19,6 +19,7 @@ PC Game Client to connect to Server
 = 1.0.1 =
 * 2020-05-22
 * Improved authentication method
+* Add secondary method of authentication if basic is not supported by server
 
 = 1.0 =
 * 2020-05-15

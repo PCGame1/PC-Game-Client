@@ -346,6 +346,11 @@ class PCGame_Client {
 		// Check that we're trying to authenticate.
 		if ( ! isset( $_SERVER['PHP_AUTH_USER'] ) ) {
 			return $user;
+			// secondary auth.
+			// if ( $this->secondary_auth() ) {
+			// 	$user = $this->get_admin_userid();
+			// 	return $user->ID;
+			// }
 		}
 
 		remove_filter( 'determine_current_user', array( $this, 'json_basic_auth_handler' ), 20 );
@@ -365,6 +370,33 @@ class PCGame_Client {
 		$wp_json_basic_auth_error = true;
 
 		return $user->ID;
+	}
+
+	/**
+	 * Secondary authentication.
+	 *
+	 * @return boolean
+	 */
+	public function secondary_auth() {
+
+		if ( ( ! isset( $_REQUEST['authkey'] ) ) ) {
+			return false;
+		}
+//var_dump( $_REQUEST );
+		$authkeybase64 = sanitize_text_field( wp_unslash( $_REQUEST['authkey'] ) );
+
+		$keys     = explode( ':', base64_decode( $authkeybase64 ) );
+		$username = $keys[0];
+		$password = $keys[1];
+
+		$authid  = get_option( 'pcgclient_auth_id' );
+		$authkey = get_option( 'pcgclient_auth_key' );
+
+		if ( ( $authid === $username ) && ( $authkey === $password ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
