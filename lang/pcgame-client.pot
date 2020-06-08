@@ -1,13 +1,10 @@
-# Copyright (C) 2014 PCGame client
+# Copyright (C) 2020 PCGame client
 # This file is distributed under the same license as the PCGame client package.
 msgid ""
 msgstr ""
 "Project-Id-Version: PCGame client 1.0\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/WordPress-Plugin-Template\n"
 "POT-Creation-Date: 2014-04-07 11:28:06+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2020-MO-DA HO:MI+ZONE\n"
