@@ -108,7 +108,7 @@ class PCGame_Client {
 	 * @param string $file File constructor.
 	 * @param string $version Plugin version.
 	 */
-	public function __construct( $file = '', $version = '1.0.1' ) {
+	public function __construct( $file = '', $version = '1.0.2' ) {
 		$this->_version = $version;
 		$this->_token   = 'pcgame_client';
 
@@ -139,52 +139,6 @@ class PCGame_Client {
 		}
 
 	} // End __construct ()
-
-
-
-	/**
-	 * Register post type function.
-	 *
-	 * @param string $post_type Post Type.
-	 * @param string $plural Plural Label.
-	 * @param string $single Single Label.
-	 * @param string $description Description.
-	 * @param array  $options Options array.
-	 *
-	 * @return bool|string|PCGame_Client_Post_Type
-	 */
-	public function register_post_type( $post_type = '', $plural = '', $single = '', $description = '', $options = array() ) {
-
-		if ( ! $post_type || ! $plural || ! $single ) {
-			return false;
-		}
-
-		$post_type = new PCGame_Client_Post_Type( $post_type, $plural, $single, $description, $options );
-
-		return $post_type;
-	}
-
-	/**
-	 * Wrapper function to register a new taxonomy.
-	 *
-	 * @param string $taxonomy Taxonomy.
-	 * @param string $plural Plural Label.
-	 * @param string $single Single Label.
-	 * @param array  $post_types Post types to register this taxonomy for.
-	 * @param array  $taxonomy_args Taxonomy arguments.
-	 *
-	 * @return bool|string|PCGame_Client_Taxonomy
-	 */
-	public function register_taxonomy( $taxonomy = '', $plural = '', $single = '', $post_types = array(), $taxonomy_args = array() ) {
-
-		if ( ! $taxonomy || ! $plural || ! $single ) {
-			return false;
-		}
-
-		$taxonomy = new PCGame_Client_Taxonomy( $taxonomy, $plural, $single, $post_types, $taxonomy_args );
-
-		return $taxonomy;
-	}
 
 	/**
 	 * Load frontend CSS.
@@ -277,7 +231,7 @@ class PCGame_Client {
 	 * @since 1.0.0
 	 * @static
 	 */
-	public static function instance( $file = '', $version = '1.0.1' ) {
+	public static function instance( $file = '', $version = '1.0.2' ) {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self( $file, $version );
 		}
@@ -365,6 +319,36 @@ class PCGame_Client {
 		$wp_json_basic_auth_error = true;
 
 		return $user->ID;
+	}
+
+	/**
+	 * Secondary authentication.
+	 *
+	 * @return boolean
+	 */
+	public function secondary_auth() {
+
+		$nonce = sanitize_text_field( wp_create_nonce( 'pcg_nonce' ) );
+
+		if ( ( ! isset( $_REQUEST['authkey'] ) ) ) {
+			wp_verify_nonce( $nonce, 'pcg_nonce' );
+			return false;
+		}
+
+		$authkeybase64 = sanitize_text_field( wp_unslash( $_REQUEST['authkey'] ) );
+
+		$keys     = explode( ':', base64_decode( $authkeybase64 ) ); //phpcs:ignore
+		$username = $keys[0];
+		$password = $keys[1];
+
+		$authid  = get_option( 'pcgclient_auth_id' );
+		$authkey = get_option( 'pcgclient_auth_key' );
+
+		if ( ( $authid === $username ) && ( $authkey === $password ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
