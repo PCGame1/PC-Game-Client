@@ -3,8 +3,8 @@ Contributors: carl-alberto
 Donate link: https://carlalberto.code.blog
 Tags: wordpress, plugin, template
 Requires at least: 4.8
-Tested up to: 5.4.1
-Stable tag: 1.0.2
+Tested up to: 5.4.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,6 +15,10 @@ PC Game Client to connect to Server
 PC Game Client to connect to Server
 
 == Changelog ==
+
+= 1.0.3 =
+* 2020-06-14
+* 1 click updates
 
 = 1.0.2 =
 * 2020-06-12
