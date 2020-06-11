@@ -103,12 +103,33 @@ class PCGame_Client {
 	public $script_suffix;
 
 	/**
+	 * Main PCGame_Client Instance
+	 *
+	 * Ensures only one instance of PCGame_Client is loaded or can be loaded.
+	 *
+	 * @param string $file File instance.
+	 * @param string $version Version parameter.
+	 *
+	 * @return Object PCGame_Client instance
+	 * @see PCGame_Client()
+	 * @since 1.0.0
+	 * @static
+	 */
+	public static function instance( $file = '', $version = '1.0.3' ) {
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self( $file, $version );
+		}
+
+		return self::$_instance;
+	} // End instance ()
+
+	/**
 	 * Constructor funtion.
 	 *
 	 * @param string $file File constructor.
 	 * @param string $version Plugin version.
 	 */
-	public function __construct( $file = '', $version = '1.0.2' ) {
+	public function __construct( $file = '', $version = '1.0.3' ) {
 		$this->_version = $version;
 		$this->_token   = 'pcgame_client';
 
@@ -217,27 +238,6 @@ class PCGame_Client {
 		load_textdomain( $domain, WP_LANG_DIR . '/' . $domain . '/' . $domain . '-' . $locale . '.mo' );
 		load_plugin_textdomain( $domain, false, dirname( plugin_basename( $this->file ) ) . '/lang/' );
 	} // End load_plugin_textdomain ()
-
-	/**
-	 * Main PCGame_Client Instance
-	 *
-	 * Ensures only one instance of PCGame_Client is loaded or can be loaded.
-	 *
-	 * @param string $file File instance.
-	 * @param string $version Version parameter.
-	 *
-	 * @return Object PCGame_Client instance
-	 * @see PCGame_Client()
-	 * @since 1.0.0
-	 * @static
-	 */
-	public static function instance( $file = '', $version = '1.0.2' ) {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self( $file, $version );
-		}
-
-		return self::$_instance;
-	} // End instance ()
 
 	/**
 	 * Cloning is forbidden.

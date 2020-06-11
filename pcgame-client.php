@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: PCGame client
- * Version: 1.0.2
+ * Version: 1.0.3
  * Plugin URI: http://pcgame.lol/
  * Description: PC Game Client to connect to Server
  * Author: Carl Alberto
  * Author URI: https://carlalberto.code.blog
  * Requires at least: 4.8
- * Tested up to: 5.4.1
+ * Tested up to: 5.4.2
  *
  * Text Domain: pcgame-client
  * Domain Path: /lang/
@@ -35,7 +35,7 @@ require_once 'includes/lib/class-pcgame-client-admin-api.php';
  * @return object PCGame_client
  */
 function pcgame_client() {
-	$instance = PCGame_client::instance( __FILE__, '1.0.2' );
+	$instance = PCGame_client::instance( __FILE__, '1.0.3' );
 
 	if ( is_null( $instance->settings ) ) {
 		$instance->settings = PCGame_client_Settings::instance( $instance );
