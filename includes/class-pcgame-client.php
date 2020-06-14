@@ -115,7 +115,7 @@ class PCGame_Client {
 	 * @since 1.0.0
 	 * @static
 	 */
-	public static function instance( $file = '', $version = '1.0.3' ) {
+	public static function instance( $file = '', $version = '1.0.3.1' ) {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self( $file, $version );
 		}
@@ -129,7 +129,7 @@ class PCGame_Client {
 	 * @param string $file File constructor.
 	 * @param string $version Plugin version.
 	 */
-	public function __construct( $file = '', $version = '1.0.3' ) {
+	public function __construct( $file = '', $version = '1.0.3.1' ) {
 		$this->_version = $version;
 		$this->_token   = 'pcgame_client';
 
